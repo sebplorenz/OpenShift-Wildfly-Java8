@@ -1,100 +1,133 @@
 {
-	"apiVersion": "v1beta1",
-	"description": "This example shows how to use prolog with wildfly on V3",
-	"items": [{
-		"apiVersion": "v1beta1",
-		"containerPort": 8080,
-		"id": "frontend",
-		"kind": "Service",
-		"port": 8080,
-		"selector": {
-			"name": "frontend"
-		}
-	},
-	{
-		"apiVersion": "v1beta1",
-		"kind": "ImageStream",
-		"metadata": {
-			"name": ""
-		}
-	},
-	{
-		"apiVersion": "v1beta1",
-		"kind": "BuildConfig",
-		"labels": {
-			"name": "jee-sample-build"
-		},
-		"metadata": {
-			"name": "jee-sample-build"
-		},
-		"parameters": {
-			"output": {
-				"to": {
-					"name": ""
-				}
-			},
-			"source": {
-				"git": {
-					"uri": "https://github.com/sebplorenz/OpenShift-Wildfly-Java8.git"
-				},
-				"contextDir": "build"
-				"type": "Git"
-			},
-			"strategy": {
-				"stiStrategy": {
-					"image": "openshift/wildfly-8-centos"
-				},
-				"type": "STI"
-			}
-		}
-	},
-	{
-		"apiVersion": "v1beta1",
-		"kind": "DeploymentConfig",
-		"metadata": {
-			"name": "frontend"
-		},
-		"template": {
-			"controllerTemplate": {
-				"podTemplate": {
-					"desiredState": {
-						"manifest": {
-							"containers": [{
-								"image": "",
-								"name": "jee-sample",
-								"ports": [{
-									"containerPort": 8080
-								}]
-							}],
-							"version": "v1beta1"
-						}
-					},
-					"labels": {
-						"name": "frontend"
-					}
-				},
-				"replicaSelector": {
-					"name": "frontend"
-				},
-				"replicas": 1
-			},
-			"strategy": {
-				"type": "Recreate"
-			}"triggers": [{
-				"imageChangeParams": {
-					"automatic": true,
-					"containerNames": ["jee-sample"],
-					"from": {
-						"name": ""
-					},
-					"tag": "latest"
-				},
-				"type": "ImageChange"
-			}]
-		}
-	}],
-	"kind": "Template",
-	"metadata": {
-		"name": "jee-sample"
-	}
+    "apiVersion": "v1beta1",
+    "description": "This example shows how to create a simple jee application in openshift origin v3",
+    "items": [
+        {
+            "apiVersion": "v1beta1",
+            "containerPort": 8080,
+            "id": "frontend",
+            "kind": "Service",
+            "port": 8080,
+            "selector": {
+                "name": "frontend"
+            }
+        },
+        {
+            "apiVersion": "v1beta1",
+            "kind": "ImageStream",
+            "metadata": {
+                "name": "origin-jee-java8-sample"
+            }
+        },
+        {
+            "apiVersion": "v1beta1",
+            "kind": "ImageStream",
+            "metadata": {
+                "name": "wildfly-8-centos"
+            },
+            "spec": {
+                "dockerImageRepository": "openshift/wildfly-8-centos"
+            }
+        },
+        {
+            "apiVersion": "v1beta1",
+            "kind": "BuildConfig",
+            "labels": {
+                "name": "jee-java8-sample-build"
+            },
+            "metadata": {
+                "name": "jee-java8-sample-build"
+            },
+            "parameters": {
+                "output": {
+                    "to": {
+                        "name": "origin-jee-java8-sample"
+                    }
+                },
+                "source": {
+                    "git": {
+                        "uri": "git://github.com/sebplorenz/OpenShift-Wildfly-Java8.git"
+                    },
+                    "contextDir": "build",
+                    "type": "Git"
+                },
+                "strategy": {
+                    "stiStrategy": {
+                        "image": "openshift/wildfly-8-centos"
+                    },
+                    "type": "STI"
+                }
+            },
+            "triggers": [
+                {
+                    "imageChange": {
+                        "from": {
+                            "name": "wildfly-8-centos"
+                        },
+                        "image": "openshift/wildfly-8-centos",
+                        "tag": "latest"
+                    },
+                    "type": "imageChange"
+                }
+            ]
+        },
+        {
+            "apiVersion": "v1beta1",
+            "kind": "DeploymentConfig",
+            "metadata": {
+                "name": "frontend"
+            },
+            "template": {
+                "controllerTemplate": {
+                    "podTemplate": {
+                        "desiredState": {
+                            "manifest": {
+                                "containers": [
+                                    {
+                                        "image": "origin-jee-java8-sample",
+                                        "name": "jee-java8-sample",
+                                        "ports": [
+                                            {
+                                                "containerPort": 8080
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "version": "v1beta1"
+                            }
+                        },
+                        "labels": {
+                            "name": "frontend"
+                        }
+                    },
+                    "replicaSelector": {
+                        "name": "frontend"
+                    },
+                    "replicas": 1
+                },
+                "strategy": {
+                    "type": "Recreate"
+                }
+            },
+            "triggers": [
+                {
+                    "imageChangeParams": {
+                        "automatic": true,
+                        "containerNames": [
+                            "jee-java8-sample"
+                        ],
+                        "from": {
+                            "name": "origin-jee-java8-sample"
+                        },
+                        "tag": "latest"
+                    },
+                    "type": "ImageChange"
+                }
+            ]
+        }
+    ],
+    "kind": "Template",
+    "metadata": {
+        "name": "jee-java8-sample"
+    }
 }
