@@ -14,8 +14,8 @@ public class Test {
 	@GET
 	@Path("{userName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getBadges(@PathParam("userName") String userName) {
-		return "Hello user " + userName + ". Your sorted characters: " + Arrays.asList(userName.toCharArray()).stream().sorted();
+	public String getUserName(@PathParam("userName") String userName) {
+		return "Hello user " + userName + ". Arrays.toString(\"" + userName + "\".chars().sorted().toArray()) returns " + Arrays.toString(userName.chars().sorted().toArray());
 	}
-
+	
 }
