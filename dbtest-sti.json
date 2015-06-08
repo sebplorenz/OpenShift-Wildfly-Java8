@@ -1,0 +1,100 @@
+{
+	"apiVersion": "v1beta1",
+	"description": "This example shows how to use prolog with wildfly on V3",
+	"items": [{
+		"apiVersion": "v1beta1",
+		"containerPort": 8080,
+		"id": "frontend",
+		"kind": "Service",
+		"port": 8080,
+		"selector": {
+			"name": "frontend"
+		}
+	},
+	{
+		"apiVersion": "v1beta1",
+		"kind": "ImageStream",
+		"metadata": {
+			"name": ""
+		}
+	},
+	{
+		"apiVersion": "v1beta1",
+		"kind": "BuildConfig",
+		"labels": {
+			"name": "jee-sample-build"
+		},
+		"metadata": {
+			"name": "jee-sample-build"
+		},
+		"parameters": {
+			"output": {
+				"to": {
+					"name": ""
+				}
+			},
+			"source": {
+				"git": {
+					"uri": "https://github.com/sebplorenz/OpenShift-Wildfly-Java8.git"
+				},
+				"contextDir": "build"
+				"type": "Git"
+			},
+			"strategy": {
+				"stiStrategy": {
+					"image": "openshift/wildfly-8-centos"
+				},
+				"type": "STI"
+			}
+		}
+	},
+	{
+		"apiVersion": "v1beta1",
+		"kind": "DeploymentConfig",
+		"metadata": {
+			"name": "frontend"
+		},
+		"template": {
+			"controllerTemplate": {
+				"podTemplate": {
+					"desiredState": {
+						"manifest": {
+							"containers": [{
+								"image": "",
+								"name": "jee-sample",
+								"ports": [{
+									"containerPort": 8080
+								}]
+							}],
+							"version": "v1beta1"
+						}
+					},
+					"labels": {
+						"name": "frontend"
+					}
+				},
+				"replicaSelector": {
+					"name": "frontend"
+				},
+				"replicas": 1
+			},
+			"strategy": {
+				"type": "Recreate"
+			}"triggers": [{
+				"imageChangeParams": {
+					"automatic": true,
+					"containerNames": ["jee-sample"],
+					"from": {
+						"name": ""
+					},
+					"tag": "latest"
+				},
+				"type": "ImageChange"
+			}]
+		}
+	}],
+	"kind": "Template",
+	"metadata": {
+		"name": "jee-sample"
+	}
+}
